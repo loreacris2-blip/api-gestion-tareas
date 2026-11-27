@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestor de Tareas | Java + HTML/CSS</title>
+    <style>
+        body { font-family: system-ui, sans-serif; background: #f3f4f6; display: flex; justify-content: center; padding: 3rem 1rem; color: #1f2937; }
+        .contenedor { background: #ffffff; padding: 2rem; border-radius: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); width: 100%; max-width: 480px; }
+        h1 { font-size: 1.5rem; margin-bottom: 1rem; color: #111827; }
+        .formulario { display: flex; gap: 0.5rem; margin-bottom: 1.5rem; }
+        input { flex: 1; padding: 0.6rem; border: 1px solid #d1d5db; border-radius: 6px; font-size: 1rem; }
+        button { background: #2563eb; color: #fff; border: none; padding: 0.6rem 1rem; border-radius: 6px; cursor: pointer; font-weight: 600; }
+        button:hover { background: #1d4ed8; }
+        ul { list-style: none; padding: 0; }
+        li { display: flex; justify-content: space-between; align-items: center; padding: 0.7rem; border-bottom: 1px solid #e5e7eb; }
+        .btn-borrar { background: #ef4444; padding: 0.3rem 0.6rem; font-size: 0.85rem; }
+        .btn-borrar:hover { background: #dc2626; }
+    </style>
+</head>
+<body>
+<div class="contenedor">
+    <h1>Gestor de Tareas (Java API)</h1>
+    <div class="formulario">
+        <input type="text" id="inputTarea" placeholder="Escribe una nueva tarea...">
+        <button onclick="agregarTarea()">Añadir</button>
+    </div>
+    <ul id="listaTareas"></ul>
+</div>
+
+<script>
+    async function cargarTareas() {
+        const res = await fetch('/tareas');
+        const tareas = await res.json();
+        const lista = document.getElementById('listaTareas');
+        lista.innerHTML = tareas.map((t, i) => `
+        <li>
+          <span>${t}</span>
+          <button class="btn-borrar" onclick="borrarTarea(${i})">Eliminar</button>
+        </li>
+      `).join('');
+    }
+
+    async function agregarTarea() {
+        const input = document.getElementById('inputTarea');
+        if (!input.value.trim()) return;
+        await fetch('/tareas', { method: 'POST', body: input.value });
+        input.value = '';
+        cargarTareas();
+    }
+
+    async function borrarTarea(indice) {
+        await fetch('/tareas/' + indice, { method: 'DELETE' });
+        cargarTareas();
+    }
+
+    cargarTareas();
+</script>
+</body>
+</html>
